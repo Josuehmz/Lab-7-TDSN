@@ -1,4 +1,4 @@
-package com.lab6.http;
+package com.lab7.http;
 
 import java.net.URI;
 import java.util.HashMap;

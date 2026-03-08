@@ -1,6 +1,6 @@
-package com.lab6;
+package com.lab7;
 
-import com.lab6.http.Request;
+import com.lab7.http.Request;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;

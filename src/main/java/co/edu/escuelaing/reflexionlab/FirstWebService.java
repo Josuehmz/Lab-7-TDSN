@@ -1,8 +1,5 @@
 package co.edu.escuelaing.reflexionlab;
 
-/**
- * Servicio web de ejemplo: POJO descubierto por reflexión y publicado por MicroSpringBoot.
- */
 @RestController
 public class FirstWebService {
 

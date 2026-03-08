@@ -9,10 +9,10 @@
     <h1>Web Framework Demo</h1>
     <p>Static file served from <code>webroot</code>.</p>
     <ul>
-        <li><a href="/">/ (MicroSpringBoot: Greetings from Spring Boot!)</a></li>
-        <li><a href="/hello">/hello (FirstWebService por reflexión)</a></li>
-        <li><a href="/App/hello?name=Pedro">/App/hello?name=Pedro</a> (modo Application)</li>
-        <li><a href="/App/pi">/App/pi</a> (modo Application)</li>
+        <li><a href="/">/</a> — Greetings from Spring Boot!</li>
+        <li><a href="/hello">/hello</a> — FirstWebService (reflection)</li>
+        <li><a href="/greeting">/greeting</a> — GreetingController (default: Hola World)</li>
+        <li><a href="/greeting?name=YourName">/greeting?name=YourName</a> — GreetingController with @RequestParam</li>
     </ul>
 </body>
 </html>

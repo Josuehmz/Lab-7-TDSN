@@ -1,4 +1,4 @@
-package com.lab6;
+package com.lab7;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
@@ -14,9 +14,9 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.lab6.http.Request;
-import com.lab6.http.Response;
-import com.lab6.http.RouteHandler;
+import com.lab7.http.Request;
+import com.lab7.http.Response;
+import com.lab7.http.RouteHandler;
 
 public class WebFramework {
 

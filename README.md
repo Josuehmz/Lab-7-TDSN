@@ -1,104 +1,131 @@
-# Web Framework for REST Services and Static Files (Lab 7 – Reflexión / IoC)
-## By: Josué Hernandez
-A lightweight Java web framework that extends a simple HTTP server with **GET REST routes** (using lambda handlers), **query parameter extraction**, and **static file serving** (HTML, PNG, etc.). Incluye un **framework IoC mínimo** que usa **reflexión** para cargar un POJO desde la línea de comandos y publicar servicios a partir de anotaciones `@RestController` y `@GetMapping`.
+# Lab 7 – Web Server and IoC Framework
+
+A minimal Java web server (Apache-style) that serves HTML and PNG files and provides a reflection-based IoC framework to build web applications from POJOs. The server handles multiple requests sequentially (non-concurrent).
 
 ## Features
 
-- **GET routes**: Register REST endpoints with `get(path, (req, res) -> body)`.
-- **Query parameters**: Access query values in handlers via `req.getValues("name")`.
-- **Static files**: Serve HTML, CSS, JS, PNG and other images from `webroot`.
-- **MicroSpringBoot (Lab 7)**: Carga un POJO por reflexión; publica métodos anotados con `@GetMapping` (retorno `String`) en las URIs indicadas. Servidor **no concurrente** (una solicitud a la vez).
-
-## Project Structure
-
-```
-Lab-7-TDSN/
-├── pom.xml
-├── README.md
-├── img/
-└── src/
-    ├── main/
-    │   ├── java/
-    │   │   ├── com/lab6/
-    │   │   │   ├── Application.java
-    │   │   │   ├── WebFramework.java
-    │   │   │   └── http/
-    │   │   │       ├── Request.java
-    │   │   │       ├── Response.java
-    │   │   │       └── RouteHandler.java
-    │   │   └── co/edu/escuelaing/reflexionlab/
-    │   │       ├── MicroSpringBoot.java    ← Punto de entrada IoC
-    │   │       ├── RestController.java     ← Anotación
-    │   │       ├── GetMapping.java         ← Anotación
-    │   │       └── FirstWebService.java    ← POJO de ejemplo
-    │   └── resources/
-    │       └── webroot/
-    │           ├── index.html
-    │           └── style.css
-    └── test/
-        └── java/com/lab6/
-            └── RequestTest.java
-```
+- **Static files**: Serves HTML, PNG, CSS, JS from `src/main/resources/webroot/`.
+- **REST from POJOs**: Controllers are plain Java classes annotated with `@RestController`. Methods annotated with `@GetMapping` are exposed as GET endpoints (return type `String`).
+- **Query parameters**: `@RequestParam(value = "name", defaultValue = "World")` binds query parameters to method arguments.
+- **Two ways to load controllers**:
+  1. **Command line**: Pass controller class name(s) as arguments.
+  2. **Classpath scanning**: With no arguments, the framework scans the package `co.edu.escuelaing.reflexionlab` for all `@RestController` classes and registers them.
 
 ## Requirements
 
 - Java 11+
 - Maven 3.x
 
-## Build and Run
-
-### Servidor clásico (rutas registradas a mano)
+## Build
 
 ```bash
 mvn clean compile
+```
+
+## Run
+
+**Option 1 – Classpath scanning (all `@RestController` in the package):**
+
+```bash
 mvn exec:java
 ```
 
-### Servidor con IoC por reflexión (Lab 7 – MicroSpringBoot)
-
-Se pasa la clase del POJO (controlador) como argumento. El framework descubre por reflexión los métodos anotados con `@GetMapping` y los publica en la URI indicada (solo retorno `String`).
+Or:
 
 ```bash
-mvn clean compile
+java -cp target/classes co.edu.escuelaing.reflexionlab.MicroSpringBoot
+```
+
+**Option 2 – Explicit controller class(es):**
+
+```bash
 java -cp target/classes co.edu.escuelaing.reflexionlab.MicroSpringBoot co.edu.escuelaing.reflexionlab.FirstWebService
 ```
 
-O con Maven (ejecución `micro-spring-boot`):
+With multiple controllers:
 
 ```bash
-mvn clean compile exec:java@micro-spring-boot
+java -cp target/classes co.edu.escuelaing.reflexionlab.MicroSpringBoot co.edu.escuelaing.reflexionlab.FirstWebService co.edu.escuelaing.reflexionlab.GreetingController
 ```
 
-En esta modalidad el servidor sirve:
+**Maven run with one controller:**
 
-- **Rutas del POJO**: `/` → "Greetings from Spring Boot!", `/hello` → mensaje de FirstWebService.
-- **Archivos estáticos**: `webroot` (p. ej. `/index.html`, imágenes PNG en `webroot`).
+```bash
+mvn exec:java -Dexec.executionId=with-controller
+```
 
-### Manual tests (screenshots)
+The server listens on **http://localhost:8080**.
 
-1. **Static file – index.html**  
-   URL: `http://localhost:8080/index.html`  
-   The page loads with the demo title and links to the REST endpoints.
+## Example endpoints (with default scan)
 
-   ![Static file - index.html](img/index.png)
+| URL | Description |
+|-----|-------------|
+| `/` | Greetings from Spring Boot! |
+| `/hello` | Hello from FirstWebService |
+| `/greeting` | Hola World (default) |
+| `/greeting?name=YourName` | Hola YourName |
+| `/index.html` | Static HTML from webroot |
+| `/image.png` | Static PNG from webroot |
 
-2. **REST GET with query – hello (name=Pedro)**  
-   URL: `http://localhost:8080/App/hello?name=Pedro`  
-   Response: `Hello Pedro`.
+## Example controller (no parameters)
 
-   ![Hello Pedro](img/hellopedro.png)
+```java
+@RestController
+public class FirstWebService {
 
-3. **REST GET with query – hello (name=Josue)**  
-   URL: `http://localhost:8080/App/hello?name=Josue`  
-   Response: `Hello Josue`.
+    @GetMapping("/")
+    public String index() {
+        return "Greetings from Spring Boot!";
+    }
 
-   ![Hello Josue](img/hellojosue.png)
+    @GetMapping("/hello")
+    public String hello() {
+        return "Hello from FirstWebService (reflexión).";
+    }
+}
+```
 
-4. **REST GET – /App/pi**  
-   URL: `http://localhost:8080/App/pi`  
-   Response: value of π (e.g. `3.141592653589793`).
+## Example controller with @RequestParam
 
-   ![Pi endpoint](img/pi.png)
+```java
+@RestController
+public class GreetingController {
 
-Additional manual check: `http://localhost:8080/unknown` returns 404 Not Found.
-   ![404](img/image.png)
+    @GetMapping("/greeting")
+    public String greeting(@RequestParam(value = "name", defaultValue = "World") String name) {
+        return "Hola " + name;
+    }
+}
+```
+
+## Project structure (Maven)
+
+- **Source**: `src/main/java/`
+  - `com.lab7`: Web server and routing (`WebFramework`, `Request`, `Response`, `RouteHandler`).
+  - `co.edu.escuelaing.reflexionlab`: IoC entry point and annotations (`MicroSpringBoot`, `@RestController`, `@GetMapping`, `@RequestParam`, example controllers).
+- **Static resources**: `src/main/resources/webroot/` (HTML, CSS, PNG, etc.).
+- **Tests**: `src/test/java/`.
+
+Lifecycle and dependencies are managed with Maven (`pom.xml`).
+
+## GitHub
+
+The project is stored in the student’s GitHub account. Clone or push using the repository URL.
+
+## AWS deployment (evidence)
+
+To run the application on AWS:
+
+1. **Build a runnable JAR** (with dependencies, if you add a shade plugin), or copy `target/classes` and run with `java -cp ... MicroSpringBoot`.
+2. **Deploy** to an EC2 instance (or similar): install Java 11, copy the built artifact, and run the same `java -cp ...` or `java -jar ...` command.
+3. **Open port 8080** in the security group for the instance.
+4. **Evidence**: A screenshot or short description showing the server running on the AWS instance (e.g. browser accessing `http://<public-ip>:8080/` or `http://<public-ip>:8080/greeting?name=AWS`).
+
+Example after deployment:
+
+- `http://<your-ec2-public-ip>:8080/` → Greetings from Spring Boot!
+- `http://<your-ec2-public-ip>:8080/greeting?name=AWS` → Hola AWS
+
+## License
+
+Educational use (Lab 7 – TDSN).

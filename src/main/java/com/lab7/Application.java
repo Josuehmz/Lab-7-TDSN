@@ -1,4 +1,4 @@
-package com.lab6;
+package com.lab7;
 
 public class Application {
 
