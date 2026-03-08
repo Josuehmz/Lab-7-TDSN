@@ -10,6 +10,6 @@ public class FirstWebService {
 
     @GetMapping("/hello")
     public String hello() {
-        return "Hello from FirstWebService (reflexión).";
+        return "Hello from FirstWebService.";
     }
 }
