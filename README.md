@@ -70,6 +70,3 @@ The server listens on **http://localhost:8080**.
 
 ![greeting with name – Hola Josue](img/nombre.png)
 
-## License
-
-Educational use (Lab 7 – TDSN).
